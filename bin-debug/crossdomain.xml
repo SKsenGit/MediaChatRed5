@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<cross-domain-policy>
+<!--		<site-control permitted-cross-domain-policies="all"/>-->
+	<allow-access-from domain="www.1618.ru"/>
+<!--	<allow-access-from domain="93.92.201.107" to-ports="20-65535"/> -->
+</cross-domain-policy>

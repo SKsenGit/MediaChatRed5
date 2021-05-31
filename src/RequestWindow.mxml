@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml"
+	 layout="absolute" width="400" 
+	 horizontalAlign="center" 
+	 verticalAlign="middle"  
+	 x= "130"
+	 y= "130"
+	 height="74" 
+	 showCloseButton="false" 
+	 title="Приглашение" 
+	 fontStyle="italic" 
+	 fontSize="12" 
+	 fontWeight="bold" 
+	 textDecoration="normal" 
+	 backgroundColor="#EBE4E4" 
+	 close="removeMe();" 
+	 showEffect="{mySounds}"	 
+	 creationComplete="Initialize();">
+
+
+<mx:Dissolve id="dissolveBtn"
+        duration="1000"
+        repeatCount="0"
+        repeatDelay="2000"
+        target="{btnAcceptRequest}" 
+        alphaFrom="1.0" alphaTo="0.0"/>
+<mx:SoundEffect id="mySounds" 
+	source="@Embed(source='sndCall.mp3')"
+	useDuration="false" 
+    loops="0"
+	repeatCount="0" 
+	repeatDelay="2000"/>
+
+	<mx:Button x="6" y="4" label="Принять приглашение" width="190" id="btnAcceptRequest" fontStyle="normal" fillAlphas="[1.0, 1.0]" fillColors="[#FBFDFC, #04FA66]" click="onClickAccept();"/>
+	<mx:Button x="200" y="4" label="Отказаться" width="172" fontWeight="bold" id="btnFailRequest" fontStyle="normal" fillAlphas="[1.0, 1.0]" fillColors="[#FDFBFB, #FB0303]" click="onClickFail();"/>
+ <mx:Script>
+        <![CDATA[
+            import mx.managers.PopUpManager;
+			import flash.net.URLRequest;
+			
+			
+			
+			private var timeRefreshInterval:Number = 120000;
+			public var dataTimer:Timer;
+			//public var sndCall:Sound = new Sound(new URLRequest("http://localhost:5080/MediaChat/sndCall.mp3"));
+			
+            
+            private function Initialize():void{
+            	this.visible = false;
+            	this.visible = true;
+            	dataTimer = new Timer(timeRefreshInterval,0);
+ 				dataTimer.addEventListener(TimerEvent.TIMER,CloseWindowWithFail);
+ 				dataTimer.start();
+
+ 				dissolveBtn.play();
+
+ 				
+ 				
+ 				
+
+            }
+            
+            private function removeMe():void {
+                dataTimer.stop();
+                mySounds.stop();
+                this.parentApplication.sendAnswer(false);;
+                PopUpManager.removePopUp(this);
+                
+            }
+            private function CloseWindowWithFail(event:TimerEvent):void
+            {
+            	mySounds.stop();
+                this.parentApplication.sendAnswer(false);
+                dataTimer.stop();
+                PopUpManager.removePopUp(this);
+                
+            }
+            private function onClickFail():void
+            {mySounds.stop();
+            	dataTimer.stop();
+                this.parentApplication.sendAnswer(false);
+                PopUpManager.removePopUp(this);
+                
+            }
+            private function onClickAccept():void
+            {	mySounds.stop();
+            	dataTimer.stop();
+                this.parentApplication.sendAnswer(true);
+                PopUpManager.removePopUp(this);
+                
+            }
+            
+        ]]>
+    </mx:Script>
+
+
+</mx:TitleWindow>

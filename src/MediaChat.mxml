@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" height="321" width="654" cornerRadius="0" backgroundGradientAlphas="[1.0, 1.0]" backgroundGradientColors="[#B0ACAC, #4C4B4B]" creationComplete="Initialize()">
+  <mx:Script source="MediaChat.as" />
+	<mx:VideoDisplay id="videoOut" width="320" height="249" cornerRadius="4" y="4" x="4"/>
+	<mx:VBox x="2" y="2" height="253" width="324" borderStyle="solid" cornerRadius="4" horizontalAlign="center" verticalAlign="middle" verticalGap="0" borderColor="#636363">
+
+	</mx:VBox>
+
+	<mx:Button x="10" y="261" label="Старт" width="304" id="btnStart" click="btnStartOnClick();"/>
+	<mx:Button x="334" y="261" label="Пригласить" width="304" id="btnStartVideo" click="btnStartVideoOnClick();"/>
+	<mx:HSlider x="364" y="285" width="280" minimum="0" maximum="1" id="lvlVolume" change="lvlVolumeOnChange();" snapInterval="0.1" liveDragging="true" allowTrackClick="true"/>
+	<mx:CheckBox x="341" y="291" width="21" id="chkMutePartner" click="lvlVolumeOnChange();"/>
+	<mx:Button x="10" y="291" label="Выкл. видео" width="150" id="btnMyVideo" click="btnMyVideoOnClick();"/>
+	<mx:Button x="163" y="291" label="Выкл. микрофон" width="151" id="btnMyAudio" click="btnMyAudioOnClick();"/>
+	<mx:Text x="333" y="303" text="выкл." color="#D1D3D4"/>
+	<mx:Text x="608" y="303" id="txtVersion" color="#CECFCF"/>
+
+	<mx:VideoDisplay id="videoIn" width="320" height="249" cornerRadius="4" y="4" x="330"/>
+	<mx:VBox x="328" y="2" height="253" width="324" borderStyle="solid" cornerRadius="4" horizontalAlign="center" verticalAlign="middle" verticalGap="0" borderColor="#636363">
+
+	</mx:VBox>
+
+</mx:Application>

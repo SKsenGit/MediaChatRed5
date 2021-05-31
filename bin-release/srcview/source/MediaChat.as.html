@@ -1,0 +1,134 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>MediaChat.as</title>
+<link rel="stylesheet" type="text/css" href="../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptComment">// ActionScript file
+</span><span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">events</span>.<span class="ActionScriptDefault_Text">KeyboardEvent</span>;
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">events</span>.<span class="ActionScriptDefault_Text">NetStatusEvent</span>;
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">media</span>.<span class="ActionScriptDefault_Text">Camera</span>;
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">media</span>.<span class="ActionScriptDefault_Text">Microphone</span>;
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">media</span>.<span class="ActionScriptDefault_Text">Video</span>;
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">net</span>.<span class="ActionScriptDefault_Text">NetConnection</span>;
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">net</span>.<span class="ActionScriptDefault_Text">NetStream</span>;
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span>.<span class="ActionScriptDefault_Text">net</span>.<span class="ActionScriptDefault_Text">ObjectEncoding</span>;
+
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span>.<span class="ActionScriptDefault_Text">controls</span>.<span class="ActionScriptDefault_Text">Alert</span>;
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span>.<span class="ActionScriptDefault_Text">core</span>.<span class="ActionScriptDefault_Text">IFlexDisplayObject</span>;
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span>.<span class="ActionScriptDefault_Text">events</span>.<span class="ActionScriptDefault_Text">FlexEvent</span>;
+
+
+<span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">baseAddr</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">&quot;localhost&quot;</span>;
+<span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">id_member</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span>, <span class="ActionScriptDefault_Text">id_partner</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">String</span>;
+
+<span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">cam</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Camera</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">null</span>;
+<span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">videoModel</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Video</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Video</span>;
+<span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">mic</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Microphone</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">null</span>;
+<span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">nc</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">NetConnection</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">NetConnection</span><span class="ActionScriptBracket/Brace">()</span>;
+
+<span class="ActionScriptComment">//public var mClient:FMSConnector=new FMSConnector();
+</span>
+<span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">ns</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">NetStream</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">null</span>;
+
+<span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">bConnect</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Boolean</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">false</span>;
+<span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">timeRefreshInterval</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Number</span> <span class="ActionScriptOperator">=</span> 9000;
+<span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">dataTimer</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">Timer</span>;
+
+
+<span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">Initialize</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+     
+     
+ <span class="ActionScriptDefault_Text">btnStartVideo</span>.<span class="ActionScriptDefault_Text">enabled</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">false</span>;
+ <span class="ActionScriptDefault_Text">btnStopMyVideo</span>.<span class="ActionScriptDefault_Text">enabled</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">false</span>;
+ <span class="ActionScriptDefault_Text">btnStopMyAudio</span>.<span class="ActionScriptDefault_Text">enabled</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">false</span>;
+
+    <span class="ActionScriptDefault_Text">id_member</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">&quot;ksen&quot;</span>;<span class="ActionScriptComment">//Application.application.parameters.uid;
+</span>    <span class="ActionScriptDefault_Text">id_partner</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">&quot;vovboc&quot;</span>;<span class="ActionScriptComment">//Application.application.parameters.chid;
+</span>        <span class="ActionScriptComment">// Добавляем обработчики событий для объекта NetConnection
+</span>        <span class="ActionScriptDefault_Text">nc</span>.<span class="ActionScriptDefault_Text">addEventListener</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">NetStatusEvent</span>.<span class="ActionScriptDefault_Text">NET_STATUS</span>, <span class="ActionScriptDefault_Text">onNCStatus</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptDefault_Text">nc</span>.<span class="ActionScriptDefault_Text">addEventListener</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">SecurityErrorEvent</span>.<span class="ActionScriptDefault_Text">SECURITY_ERROR</span>, <span class="ActionScriptDefault_Text">securityErrorHandler</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptDefault_Text">nc</span>.<span class="ActionScriptDefault_Text">addEventListener</span><span class="ActionScriptBracket/Brace">(A</span><span class="ActionScriptDefault_Text">syncErrorEvent</span>.<span class="ActionScriptDefault_Text">ASYNC_ERROR</span>, <span class="ActionScriptDefault_Text">asyncErrorHandler</span><span class="ActionScriptBracket/Brace">)</span>;
+        
+        <span class="ActionScriptDefault_Text">nc</span>.<span class="ActionScriptDefault_Text">objectEncoding</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">ObjectEncoding</span>.<span class="ActionScriptDefault_Text">AMF0</span>;        
+
+
+
+ <span class="ActionScriptBracket/Brace">}</span>
+ 
+ <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">btnStartOnClick</span><span class="ActionScriptBracket/Brace">()</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+     
+
+
+     <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">btnStart</span>.<span class="ActionScriptDefault_Text">label</span> <span class="ActionScriptOperator">==</span> <span class="ActionScriptString">&quot;Старт&quot;</span><span class="ActionScriptBracket/Brace">)</span>
+     <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptDefault_Text">nc</span>.<span class="ActionScriptDefault_Text">connect</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;rtmp://&quot;</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptDefault_Text">baseAddr</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptString">&quot;/MediaChat&quot;</span>, <span class="ActionScriptReserved">true</span><span class="ActionScriptBracket/Brace">)</span>;
+      <span class="ActionScriptBracket/Brace">}</span>
+      <span class="ActionScriptReserved">else</span>
+      <span class="ActionScriptBracket/Brace">{</span>
+          <span class="ActionScriptDefault_Text">btnStart</span>.<span class="ActionScriptDefault_Text">label</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">&quot;Старт&quot;</span>;
+         <span class="ActionScriptDefault_Text">btnStartVideo</span>.<span class="ActionScriptDefault_Text">enabled</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">false</span>;
+         <span class="ActionScriptDefault_Text">btnStopMyVideo</span>.<span class="ActionScriptDefault_Text">enabled</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">false</span>;
+         <span class="ActionScriptDefault_Text">btnStopMyAudio</span>.<span class="ActionScriptDefault_Text">enabled</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">false</span>;
+          <span class="ActionScriptDefault_Text">ns</span>.<span class="ActionScriptDefault_Text">close</span><span class="ActionScriptBracket/Brace">()</span>;
+          <span class="ActionScriptDefault_Text">nc</span>.<span class="ActionScriptDefault_Text">close</span><span class="ActionScriptBracket/Brace">()</span>;
+          <span class="ActionScriptDefault_Text">videoOut</span>.<span class="ActionScriptDefault_Text">stop</span><span class="ActionScriptBracket/Brace">()</span>;
+
+      
+      <span class="ActionScriptBracket/Brace">}</span>
+ 
+ <span class="ActionScriptBracket/Brace">}</span>
+ 
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">securityErrorHandler</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">event</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">SecurityErrorEvent</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+
+    <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">asyncErrorHandler</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">event</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">AsyncErrorEvent</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+
+    <span class="ActionScriptComment">// Обработчик статуса соединения
+</span>    <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">onNCStatus</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">event</span><span class="ActionScriptOperator">:</span><span class="ActionScriptDefault_Text">NetStatusEvent</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">:</span><span class="ActionScriptReserved">void</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">switch</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">event</span>.<span class="ActionScriptDefault_Text">info</span>.<span class="ActionScriptDefault_Text">code</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">// При успешном соединении
+</span>            <span class="ActionScriptReserved">case</span> <span class="ActionScriptString">&quot;NetConnection.Connect.Success&quot;</span><span class="ActionScriptOperator">:</span>
+                <span class="ActionScriptComment">// Создаём стрим на основе объекта соединения
+</span>                <span class="ActionScriptDefault_Text">ns</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">NetStream</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">nc</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptComment">// Добавляем обработчики событий чтобы не ругался
+</span>                <span class="ActionScriptDefault_Text">ns</span>.<span class="ActionScriptDefault_Text">addEventListener</span><span class="ActionScriptBracket/Brace">(A</span><span class="ActionScriptDefault_Text">syncErrorEvent</span>.<span class="ActionScriptDefault_Text">ASYNC_ERROR</span>, <span class="ActionScriptDefault_Text">asyncErrorHandler</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">ns</span>.<span class="ActionScriptDefault_Text">addEventListener</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">NetStatusEvent</span>.<span class="ActionScriptDefault_Text">NET_STATUS</span>, <span class="ActionScriptDefault_Text">onNCStatus</span><span class="ActionScriptBracket/Brace">)</span>;
+                 <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">cam</span> <span class="ActionScriptOperator">==</span> <span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span>    
+                     <span class="ActionScriptBracket/Brace">{</span>
+                     <span class="ActionScriptDefault_Text">cam</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">Camera</span>.<span class="ActionScriptDefault_Text">getCamera</span><span class="ActionScriptBracket/Brace">()</span>;
+                     <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">cam</span><span class="ActionScriptOperator">==</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span>
+                         <span class="ActionScriptBracket/Brace">{</span>
+        
+                        <span class="ActionScriptDefault_Text">Alert</span>.<span class="ActionScriptDefault_Text">show</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;Камера не обнаружена!&quot;</span><span class="ActionScriptBracket/Brace">)</span>;
+                        <span class="ActionScriptReserved">return</span>;
+    
+                         <span class="ActionScriptBracket/Brace">}</span>
+                    <span class="ActionScriptDefault_Text">cam</span>.<span class="ActionScriptDefault_Text">setMode</span><span class="ActionScriptBracket/Brace">(</span>213, 160, 10<span class="ActionScriptBracket/Brace">)</span>;
+                    <span class="ActionScriptDefault_Text">cam</span>.<span class="ActionScriptDefault_Text">setQuality</span><span class="ActionScriptBracket/Brace">(</span>50000, 90<span class="ActionScriptBracket/Brace">)</span>;
+                     <span class="ActionScriptBracket/Brace">}</span>
+                 <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">mic</span> <span class="ActionScriptOperator">==</span> <span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span>    <span class="ActionScriptDefault_Text">mic</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">Microphone</span>.<span class="ActionScriptDefault_Text">getMicrophone</span><span class="ActionScriptBracket/Brace">()</span>
+                
+                <span class="ActionScriptComment">// Соединяем стрим с вебкамерой
+</span>                <span class="ActionScriptDefault_Text">ns</span>.<span class="ActionScriptDefault_Text">attachCamera</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">cam</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">ns</span>.<span class="ActionScriptDefault_Text">attachAudio</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">mic</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">videoOut</span>.<span class="ActionScriptDefault_Text">attachCamera</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">cam</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptComment">// Запускаем передачу данных
+</span>                <span class="ActionScriptDefault_Text">ns</span>.<span class="ActionScriptDefault_Text">publish</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">id_member</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptDefault_Text">id_partner</span><span class="ActionScriptBracket/Brace">)</span>;
+                 <span class="ActionScriptDefault_Text">btnStartVideo</span>.<span class="ActionScriptDefault_Text">enabled</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">true</span>;
+                 <span class="ActionScriptDefault_Text">btnStopMyVideo</span>.<span class="ActionScriptDefault_Text">enabled</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">true</span>;
+                 <span class="ActionScriptDefault_Text">btnStopMyAudio</span>.<span class="ActionScriptDefault_Text">enabled</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">true</span>;
+                 <span class="ActionScriptDefault_Text">btnStart</span>.<span class="ActionScriptDefault_Text">label</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">&quot;Стоп&quot;</span>;
+                <span class="ActionScriptReserved">break</span>;
+            <span class="ActionScriptReserved">case</span> <span class="ActionScriptString">&quot;NetConnection.Connect.Failed&quot;</span><span class="ActionScriptOperator">:</span>
+                <span class="ActionScriptDefault_Text">Alert</span>.<span class="ActionScriptDefault_Text">show</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">&quot;Невозможно установить соединение с сервером!&quot;</span><span class="ActionScriptBracket/Brace">)</span>;    
+        <span class="ActionScriptBracket/Brace">}</span>   
+    <span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>
